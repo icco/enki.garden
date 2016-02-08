@@ -10,7 +10,7 @@ There is a problem though, a lot of things that we as humans acquire cannot be l
 
 So until laws are fixed up, I want the ability to organize my digital hoard. I want it backed up. I want it searchable. I want it editable.
 
-Right now I use a mixture of [Kodi](http://kodi.tv/), [Sickbeard](http://sickbeard.com/), [Dropbox](http://www.dropbox.com/) and [Google Drive](https://drive.google.com) to store and organize all of my shit. I have about 20TB of Movies, TV, Random Video, Music, Photography, Text, PDFs, EPubs, Mobi docs, etc.
+Right now I use a mixture of Github, [Kodi](http://kodi.tv/), [Sickbeard](http://sickbeard.com/), [Dropbox](http://www.dropbox.com/) and [Google Drive](https://drive.google.com) to store and organize all of my shit. I have about 20TB of Movies, TV, Random Video, Music, Photography, Text, PDFs, EPubs, Mobi docs, etc.
 
 ## Things to think about
 
