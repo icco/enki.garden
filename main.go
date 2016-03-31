@@ -43,32 +43,12 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "ok")
 }
 
-func addCORSHeaders(w http.ResponseWriter, host string) http.ResponseWriter {
-	w.Header().Add("Access-Control-Allow-Origin", host)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
-	w.Header().Add("Access-Control-Allow-Methods", "POST, OPTIONS")
-	w.Header().Add("Access-Control-Allow-Headers", "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type")
-
-	return w
-}
-
 func apiHandler(w http.ResponseWriter, r *http.Request) {
-	// If OPTION, return just CORS headers
-	if r.Method == http.MethodOptions {
-		w = addCORSHeaders(w, r.Host)
-		w.Header().Add("Access-Control-Max-Age", "1728000") // 20 days
-		w.Header().Add("Content-Type", "text/plain charset=UTF-8")
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
 	// Only allow POSTs
 	if r.Method != http.MethodPost {
 		http.Error(w, "Not a valid method.", http.StatusBadRequest)
 		return
 	}
-
-	w = addCORSHeaders(w, r.Host)
 
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
