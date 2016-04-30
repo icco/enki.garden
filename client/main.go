@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"os"
 	"path/filepath"
@@ -11,9 +11,9 @@ import (
 var files = []EnkiFile{}
 
 type EnkiFile struct {
-	Size    int64
-	ModTime time.Time
-	Path    string
+	Size    int64     `json:"size"`
+	ModTime time.Time `json:"modified"`
+	Path    string    `json:"path"`
 }
 
 func registerFile(path string, info os.FileInfo, err error) error {
@@ -27,8 +27,14 @@ func registerFile(path string, info os.FileInfo, err error) error {
 		size = info.Size()
 	}
 
+	abs_path, err := filepath.Abs(path)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
+
 	files = append(files, EnkiFile{
-		Path:    path,
+		Path:    abs_path,
 		ModTime: info.ModTime(),
 		Size:    size,
 	})
@@ -37,14 +43,29 @@ func registerFile(path string, info os.FileInfo, err error) error {
 }
 
 func main() {
-	log.SetFlags(log.Lshortfile)
+	if len(os.Args) < 2 || len(os.Args) > 3 {
+		log.Printf("Usage: %s path [filename.json]", os.Args[0])
+		os.Exit(1)
+	}
+
 	dir := os.Args[1]
 	err := filepath.Walk(dir, registerFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, v := range files {
-		fmt.Printf("%+v\n", v)
+	if len(os.Args) == 3 {
+		f, err := os.Create(os.Args[2])
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+
+		enc := json.NewEncoder(f)
+		enc.Encode(files)
+	} else {
+		for _, v := range files {
+			log.Printf("%+v", v)
+		}
 	}
 }
