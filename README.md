@@ -15,7 +15,24 @@ Right now I use a mixture of Github, [Kodi](http://kodi.tv/), [Sickbeard](http:/
 ## Things to think about
 
  - Camlistore
+ - https://infinit.sh/
  - Metadata storage
  - Cost
 
 Camlistore has the best/closest thoughts to what I want in a system: https://camlistore.org/docs/overview
+
+## MVP
+
+The MVP for this app is a simple indexing and search app. It's not actually that simple though because of a few things:
+
+ - My personal laptop
+   - 116,241 dirs and 538,962 files in its home directory
+   - 511,158 directories and 2,667,402 files.
+   - Walking `/` with `tree -if` takes greater than ten minutes (aprox 30 min)
+ - I have eight computers I want to index
+   - 3 rPi
+   - 2 Synology (1812+, 1813+)
+     - Note: [Compile Golang for synology](http://www.faun.me/2015/02/17/cross-compiling-golang-applications-for-synology-1513.html)
+   - 3 OS X boxen
+
+So, that means worse case I probably have 20 million files on all of my computers... which is a non-trivial amount to store in a database.
