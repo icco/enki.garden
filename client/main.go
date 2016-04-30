@@ -1,36 +1,37 @@
 package main
 
 import (
-	"crypto/sha512"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
-var files = make(map[[sha512.Size]byte]string)
+var files = []EnkiFile{}
 
-func checkDuplicate(path string, info os.FileInfo, err error) error {
+type EnkiFile struct {
+	Size    int64
+	ModTime time.Time
+	Path    string
+}
+
+func registerFile(path string, info os.FileInfo, err error) error {
 	if err != nil {
 		log.Print(err)
 		return nil
 	}
-	if info.IsDir() {
-		return nil
+
+	var size int64
+	if !info.IsDir() {
+		size = info.Size()
 	}
 
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Print(err)
-		return nil
-	}
-	digest := sha512.Sum512(data)
-	if v, ok := files[digest]; ok {
-		fmt.Printf("%q is a duplicate of %q\n", path, v)
-	} else {
-		files[digest] = path
-	}
+	files = append(files, EnkiFile{
+		Path:    path,
+		ModTime: info.ModTime(),
+		Size:    size,
+	})
 
 	return nil
 }
@@ -38,8 +39,12 @@ func checkDuplicate(path string, info os.FileInfo, err error) error {
 func main() {
 	log.SetFlags(log.Lshortfile)
 	dir := os.Args[1]
-	err := filepath.Walk(dir, checkDuplicate)
+	err := filepath.Walk(dir, registerFile)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	for _, v := range files {
+		fmt.Printf("%+v\n", v)
 	}
 }
