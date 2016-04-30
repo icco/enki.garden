@@ -1,7 +1,10 @@
 package main
 
 import (
+	"compress/gzip"
 	"encoding/json"
+	"flag"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -43,27 +46,50 @@ func registerFile(path string, info os.FileInfo, err error) error {
 }
 
 func main() {
-	if len(os.Args) < 2 || len(os.Args) > 3 {
-		log.Printf("Usage: %s path [filename.json]", os.Args[0])
+	compress := flag.Bool("c", false, "Compress Output.")
+	verbose := flag.Bool("v", false, "Verbose Logging")
+	filename := flag.String("name", "output.json", "Where to output json")
+	flag.Parse()
+
+	args := flag.Args()
+
+	if len(args) != 1 {
+		log.Printf("%+v", args)
+		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+		flag.PrintDefaults()
 		os.Exit(1)
 	}
 
-	dir := os.Args[1]
+	dir := args[0]
 	err := filepath.Walk(dir, registerFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if len(os.Args) == 3 {
-		f, err := os.Create(os.Args[2])
+	var enc *json.Encoder
+	if *compress {
+		fp, err := os.Create(fmt.Sprintf("%s.gz", *filename))
+		if err != nil {
+			log.Fatal(err)
+		}
+		f, err := gzip.NewWriterLevel(fp, gzip.BestCompression)
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer f.Close()
-
-		enc := json.NewEncoder(f)
-		enc.Encode(files)
+		enc = json.NewEncoder(f)
 	} else {
+		f, err := os.Create(*filename)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		enc = json.NewEncoder(f)
+	}
+
+	enc.Encode(files)
+
+	if *verbose {
 		for _, v := range files {
 			log.Printf("%+v", v)
 		}
