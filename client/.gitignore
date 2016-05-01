@@ -1,1 +1,5 @@
 client
+*.gob
+*.json
+*.gob.gz
+*.json.gz
