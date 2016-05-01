@@ -24,3 +24,4 @@ _testmain.go
 *.prof
 
 .otto*
+.DS_Store
