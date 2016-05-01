@@ -2,7 +2,7 @@ package main
 
 import (
 	"compress/gzip"
-	"encoding/json"
+	"encoding/gob"
 	"flag"
 	"fmt"
 	"log"
@@ -14,9 +14,9 @@ import (
 var files = []EnkiFile{}
 
 type EnkiFile struct {
-	Size    int64     `json:"size"`
-	ModTime time.Time `json:"modified"`
-	Path    string    `json:"path"`
+	Size    int64
+	ModTime time.Time
+	Path    string
 }
 
 func registerFile(path string, info os.FileInfo, err error) error {
@@ -48,7 +48,7 @@ func registerFile(path string, info os.FileInfo, err error) error {
 func main() {
 	compress := flag.Bool("c", false, "Compress Output.")
 	verbose := flag.Bool("v", false, "Verbose Logging")
-	filename := flag.String("name", "output.json", "Where to output json")
+	filename := flag.String("file", "output.gob", "Where to output gob")
 	flag.Parse()
 
 	args := flag.Args()
@@ -66,7 +66,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var enc *json.Encoder
+	var enc *gob.Encoder
 	if *compress {
 		fp, err := os.Create(fmt.Sprintf("%s.gz", *filename))
 		if err != nil {
@@ -77,16 +77,23 @@ func main() {
 			log.Fatal(err)
 		}
 		defer f.Close()
-		enc = json.NewEncoder(f)
+		enc = gob.NewEncoder(f)
 	} else {
 		f, err := os.Create(*filename)
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer f.Close()
-		enc = json.NewEncoder(f)
 	}
+	enc = gob.NewEncoder(f)
 
+	var enc *gob.Encoder
+	f, err := os.Create(*filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	enc = gob.NewEncoder(f)
 	enc.Encode(files)
 
 	if *verbose {
