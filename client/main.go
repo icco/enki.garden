@@ -1,3 +1,5 @@
+// This client is for indexing a folder heirarchy and storing it on a remote
+// server.
 package main
 
 import (
@@ -13,13 +15,26 @@ import (
 
 var files = []EnkiFile{}
 
+// EnkiFile is the data structure we use for storing data into "the cloud".
+// This should get translated into whatever format we send over the wire.
 type EnkiFile struct {
 	Size    int64
 	ModTime time.Time
 	Path    string
 }
 
-func registerFile(path string, info os.FileInfo, err error) error {
+// Our walk function. It takes in a path and file info and stores that data
+// locally in a sqlite DB.
+//
+// The path argument contains the argument to Walk as a prefix; that is, if
+// Walk is called with "dir", which is a directory containing the file "a", the
+// walk function will be called with argument "dir/a". The info argument is the
+// os.FileInfo for the named path.
+//
+// If there was a problem walking to the file or directory named by path, the
+// incoming error will describe the problem and Walk will not descend into that
+// directory. We just log the error and continue.
+func walkFunction(path string, info os.FileInfo, err error) error {
 	if err != nil {
 		log.Print(err)
 		return nil
@@ -61,7 +76,7 @@ func main() {
 	}
 
 	dir := args[0]
-	err := filepath.Walk(dir, registerFile)
+	err := filepath.Walk(dir, walkFunction)
 	if err != nil {
 		log.Fatal(err)
 	}
