@@ -2,5 +2,5 @@ language: go
 go:
 - '1.6'
 script:
-- go build ./server
-- go build ./client
+- go build -o s ./server
+- go build -o c ./client
