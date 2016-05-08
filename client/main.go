@@ -99,8 +99,8 @@ func main() {
 			log.Fatal(err)
 		}
 		defer f.Close()
+		enc = gob.NewEncoder(f)
 	}
-	enc = gob.NewEncoder(f)
 
 	var enc *gob.Encoder
 	f, err := os.Create(*filename)
