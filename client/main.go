@@ -4,6 +4,7 @@ package main
 
 import (
 	"compress/gzip"
+	"database/sql"
 	"encoding/gob"
 	"flag"
 	"fmt"
@@ -11,9 +12,12 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var files = []EnkiFile{}
+var db sql.DB
 
 // EnkiFile is the data structure we use for storing data into "the cloud".
 // This should get translated into whatever format we send over the wire.
@@ -75,8 +79,16 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Open up database!
+	// https://github.com/mattn/go-sqlite3/blob/master/_example/simple/simple.go
+	db, err := sql.Open("sqlite3", "./foo.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
 	dir := args[0]
-	err := filepath.Walk(dir, walkFunction)
+	err = filepath.Walk(dir, walkFunction)
 	if err != nil {
 		log.Fatal(err)
 	}
