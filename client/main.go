@@ -102,7 +102,6 @@ func main() {
 		enc = gob.NewEncoder(f)
 	}
 
-	var enc *gob.Encoder
 	f, err := os.Create(*filename)
 	if err != nil {
 		log.Fatal(err)
