@@ -7,9 +7,17 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	// "net/rpc"
 	"time"
+
+	"github.com/icco/enki.garden/client"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
 )
+
+type StatusMsg struct {
+	Msg string `json:"msg"`
+}
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	const tpl = `
@@ -45,6 +53,8 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
+
 	// Only allow POSTs
 	if r.Method != http.MethodPost {
 		http.Error(w, "Not a valid method.", http.StatusBadRequest)
@@ -58,13 +68,33 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	event, err := validateJson(data)
+	file, err := validateJson(data)
 	if err != nil {
 		http.Error(w, "Not valid data.", http.StatusBadRequest)
 		return
 	}
 
-	json_str, err := json.Marshal(event)
+	k := datastore.NewKey(ctx, "File", "stringID", 0, nil)
+	e := new(Entity)
+	if err := datastore.Get(ctx, k, e); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	old := e.Value
+	e.Value = r.URL.Path
+
+	if _, err := datastore.Put(ctx, k, e); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	fmt.Fprintf(w, "old=%q\nnew=%q\n", old, e.Value)
+
+	status := StatusMsg{Msg: "Success"}
+
+	json_str, err := json.Marshal(status)
 	if err != nil {
 		log.Printf("JSON Marshal Error: %+v", err)
 		http.Error(w, "Could not turn struct to string.", http.StatusInternalServerError)
@@ -74,12 +104,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", json_str) // send data to client side
 }
 
-type EventMsg struct {
-	Timestamp time.Time `json:"timestamp"`
-	Uuid      string    `json:"uuid"`
-}
-
-func validateJson(msg []byte) (EventMsg, error) {
+func validateJson(msg []byte) (client.EnkiFile, error) {
 	var m EventMsg
 	err := json.Unmarshal(msg, &m)
 	if err != nil {

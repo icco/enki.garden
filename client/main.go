@@ -22,9 +22,10 @@ var db sql.DB
 // EnkiFile is the data structure we use for storing data into "the cloud".
 // This should get translated into whatever format we send over the wire.
 type EnkiFile struct {
-	Size    int64
-	ModTime time.Time
-	Path    string
+	Size    int64     `json:"size"`
+	ModTime time.Time `json:"mod_time"`
+	Path    string    `json:"path"`
+	Host    string    `json:"host"`
 }
 
 // Our walk function. It takes in a path and file info and stores that data
