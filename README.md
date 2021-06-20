@@ -18,6 +18,9 @@ Right now I use a mixture of Github, [Kodi](http://kodi.tv/), [Sickbeard](http:/
  - https://infinit.sh/
  - Metadata storage
  - Cost
+ - https://github.com/N0taN3rd/Squidwarc
+ - https://github.com/internetarchive/heritrix3
+ - https://archive.fo/
 
 Camlistore has the best/closest thoughts to what I want in a system: https://camlistore.org/docs/overview
 
